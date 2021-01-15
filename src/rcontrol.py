@@ -6,7 +6,7 @@ if sys.hexversion < 0x03000000:
     exit("Please use python3")
 
 import time
-import random
+import microbit
 
 FORWARD  = "f"
 BACKWARD = "b"
@@ -15,23 +15,8 @@ MAXACC   = 1000
 DEADZONE = 100
 MAXSPEED = 100
 MAXDIRN  = 100
+TICKSEC  = 0.1
 
-
-class Microbit:
-    """scaffolding due to no micro:bit added yet (BITIO)"""
-    class Accelerometer:
-        _VALUES = ((0, 0, 0), (200, 200, 0), (0, 0, 0), (300, -300, 0))
-        _index = 0
-        def get_values(self) -> tuple:  # x, y, z
-            values = self._VALUES[self._index]
-            self._index += 1
-            if self._index >= len(self._VALUES):
-                self._index = 0
-            return values
-
-    accelerometer = Accelerometer()
-
-microbit = Microbit()
 
 class TimingGate():
     """A way to generate timing ticks cooperatively"""
@@ -47,40 +32,6 @@ class TimingGate():
             return False
         self._next = now + self._rate
         return True
-
-
-# class VisualRobot():
-#     def __init__(self):
-#         pass
-#
-#     def forward(self, speed: int = 100):
-#         pass
-#
-#     def backward(self, speed: int = 100):
-#         pass
-#
-#     def steer(self, direction: int = 0):
-#         pass
-
-
-class TextRobot():
-    """A simulation of a robot that just prints messages"""
-    @staticmethod
-    def _say(msg:str) -> None:
-        print(msg)
-
-    def stop(self):
-        self._say("STOP")
-
-    def forward(self, speed:int=100):
-        self._say("FORWARD:%d" % speed)
-
-    def backward(self, speed:int=100):
-        self._say("BACKWARD:%d" % speed)
-
-    def steer(self, direction:int=0):
-        self._say("STEER:%d" % direction)
-
 
 class Controller():
     """A model of a hand controller, handles transforms from tilt to commands"""
@@ -112,7 +63,7 @@ class Controller():
         x, y, z = microbit.accelerometer.get_values()
         return self._calculate(x, y)
 
-tg = TimingGate(1)
+tg = TimingGate(TICKSEC)
 controller = Controller()
 gear, speed, direction = STOP, 0, 0
 

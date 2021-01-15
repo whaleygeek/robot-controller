@@ -6,15 +6,17 @@ if sys.hexversion < 0x03000000:
     exit("Please use python3")
 
 import rcontrol as rc
+import robot
 
-robot = rc.TextRobot()
+robbie = robot.VisualRobot()
 
 while True:
     changed, gear, speed, direction = rc.sense()
     if changed:
-        if   gear == rc.FORWARD:    robot.forward(speed)
-        elif gear == rc.BACKWARD:   robot.backward(speed)
-        elif gear == rc.STOP:       robot.stop()
-        robot.steer(direction)
+        if   gear == rc.FORWARD:    robbie.forward(speed)
+        elif gear == rc.BACKWARD:   robbie.backward(speed)
+        elif gear == rc.STOP:       robbie.stop()
+        robbie.steer(direction)
+
 
 # END
