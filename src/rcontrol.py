@@ -2,7 +2,7 @@
 # Remote controller for a robot, using a micro:bit
 
 import sys
-if sys.hexversion < 0x00030000:
+if sys.hexversion < 0x03000000:
     exit("Please use python3")
 
 import time
