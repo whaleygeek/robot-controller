@@ -6,30 +6,46 @@ if sys.hexversion < 0x00030000:
     exit("Please use python3")
 
 import time
-
-class microbit:
-    """scaffolding due to no micro:bit added yet (BITIO)"""
-    class accelerometer:
-        @staticmethod
-        def get_values() -> tuple:  # x, y, z
-            return 0, 0, 0
+import random
 
 FORWARD  = "f"
 BACKWARD = "b"
 STOP     = "s"
+MAXACC   = 1000
+DEADZONE = 100
+MAXSPEED = 100
+MAXDIRN  = 100
+
+
+class Microbit:
+    """scaffolding due to no micro:bit added yet (BITIO)"""
+    class Accelerometer:
+        _VALUES = ((0, 0, 0), (200, 200, 0), (0, 0, 0), (300, -300, 0))
+        _index = 0
+        def get_values(self) -> tuple:  # x, y, z
+            values = self._VALUES[self._index]
+            self._index += 1
+            if self._index >= len(self._VALUES):
+                self._index = 0
+            return values
+
+    accelerometer = Accelerometer()
+
+microbit = Microbit()
 
 class TimingGate():
     """A way to generate timing ticks cooperatively"""
-    def __init__(self, ratems: int = 100):
-        self._ratems = ratems
-        self._next = time.time() + ratems
+    def __init__(self, rate: float = 0.1):
+        self._rate = rate
+        self._next = time.time() + rate
 
     def __call__(self) -> bool:
         """Check if the next timing gate has occurred"""
         now = time.time()
+
         if now < self._next:
             return False
-        self._next = now + self._ratems
+        self._next = now + self._rate
         return True
 
 
@@ -53,6 +69,9 @@ class TextRobot():
     def _say(msg:str) -> None:
         print(msg)
 
+    def stop(self):
+        self._say("STOP")
+
     def forward(self, speed:int=100):
         self._say("FORWARD:%d" % speed)
 
@@ -65,10 +84,6 @@ class TextRobot():
 
 class Controller():
     """A model of a hand controller, handles transforms from tilt to commands"""
-    DEADZONE = 100
-    MAXACC   = 1000
-    MAXSPEED = 100
-    MAXDIRN  = 100
 
     @staticmethod
     def _limit(v:int, limit:int) -> int:
@@ -78,26 +93,26 @@ class Controller():
 
     @staticmethod
     def _calculate(x:int, y:int) -> tuple:
-        x = Controller._limit(x, Controller.MAXACC)
-        y = Controller._limit(y, Controller.MAXACC)
+        x = Controller._limit(x, MAXACC)
+        y = Controller._limit(y, MAXACC)
 
-        if abs(x) < Controller.DEADZONE \
-        or abs(y) < Controller.DEADZONE:
+        if abs(x) < DEADZONE \
+        or abs(y) < DEADZONE:
             return STOP, 0, 0
 
-        speed = abs(x) * Controller.MAXSPEED / Controller.MAXACC
-        direction = y * Controller.MAXDIRN / Controller.MAXACC
+        s = abs(x) * MAXSPEED / MAXACC
+        d = y      * MAXDIRN  / MAXACC
 
         if x > 0:
-            return FORWARD, speed, direction
+            return FORWARD, s, d
         else:
-            return BACKWARD, speed, direction
+            return BACKWARD, s, d
 
     def sense(self) -> tuple:
         x, y, z = microbit.accelerometer.get_values()
         return self._calculate(x, y)
 
-tg = TimingGate()
+tg = TimingGate(1)
 controller = Controller()
 gear, speed, direction = STOP, 0, 0
 
@@ -110,8 +125,17 @@ def sense() -> tuple:  # (changed, gear, speed, direction)
 
     changed = False
     if tg():
-        gear, speed, direction = controller.sense()
-        changed = True
+        print("TICK")
+        g, s, d = controller.sense()
+        if g != gear:
+            gear = g
+            changed = True
+        if s != speed:
+            speed = s
+            changed = True
+        if d != direction:
+            direction = d
+            changed = True
 
     return changed, gear, speed, direction
 
