@@ -8,7 +8,7 @@ import radio
 
 DEADZONE = 300
 ACCMAX   = 1000
-UPDATEMS = 500
+UPDATEMS = 200
 STOP     = "S"
 FORWARD  = "F"
 BACKWARD = "B"
@@ -66,9 +66,6 @@ def update_display(gear, steer):
 
     display.show(img)
 
-def chksum(payload):
-    return 0  #TODO
-
 def dig2(v, signed=False):
     s = v < 0
     v = abs(v)
@@ -85,9 +82,7 @@ def encode(gear, rate, steer, user=None):
     ba = "1" if button_a.is_pressed() else "0"
     bb = "1" if button_b.is_pressed() else "0"
     payload = UNIQUE + dig2(seqno) + ba + bb + gear + dig2(rate) + dig2(steer, signed=True)
-    chk = dig2(chksum(payload))
-    payload += chk
-    if user is not None: payload += user
+    if user is not None: payload += ":" + user
     seqno = (seqno + 1) % 100
     return payload
 
@@ -100,7 +95,7 @@ def loop():
         update_display(gear, steer)
         payload = encode(gear, rate, steer)
         print(payload)
-        ##radio.send(payload)
+        radio.send(payload)
         sleep(UPDATEMS)
 
 # MAIN PROGRAM
