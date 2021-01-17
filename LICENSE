@@ -1,4 +1,8 @@
-MIT License
+MIT License (for robot_controller and bitio)
+
+NOTE: There is an embedded version of pyserial in this repo, it has its
+own LICENCE file in the microbit/serial/LICENCE.txt
+
 
 Copyright (c) 2021 David Whale
 
