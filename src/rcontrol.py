@@ -8,15 +8,12 @@ if sys.hexversion < 0x03000000:
 import time
 import microbit
 
-FORWARD  = "f"
-BACKWARD = "b"
-STOP     = "s"
-MAXACC   = 1000
-DEADZONE = 100
+FORWARD  = "F"
+BACKWARD = "B"
+STOP     = "S"
 MAXSPEED = 100
 MAXDIRN  = 100
 TICKSEC  = 0.1
-
 
 class TimingGate():
     """A way to generate timing ticks cooperatively"""
@@ -34,61 +31,65 @@ class TimingGate():
         return True
 
 class Controller():
-    """A model of a hand controller, handles transforms from tilt to commands"""
+    UNIQUE = "RC"  # unique code for this controller
 
-    @staticmethod
-    def _limit(v:int, limit:int) -> int:
-        if v > limit: return limit
-        if v < -limit: return -limit
-        return v
+    def receive(self):
+        return microbit.radio.receive()
 
-    @staticmethod
-    def _calculate(x:int, y:int) -> tuple:
-        x = Controller._limit(x, MAXACC)
-        y = Controller._limit(y, MAXACC)
+    def decode(self, payload) -> tuple or None:
+        # gear(SFB), rate(0..99), steer(-99..99)
+        # RCNNABGRR+SS  (12 chars)
+        # 0123456789AB
 
-        if abs(x) < DEADZONE \
-        or abs(y) < DEADZONE:
-            return STOP, 0, 0
+        if len(payload) < 12: return None
+        if payload[0:2] != self.UNIQUE: return None
 
-        s = abs(x) * MAXSPEED / MAXACC
-        d = y      * MAXDIRN  / MAXACC
+        ##seqno    = payload[2:4]
+        ##button_a = True if payload[4] == "1" else False
+        ##button_b = True if payload[5] == "1" else False
+        gear     = payload[6]
+        try:
+            rate     = int(payload[7:9])
+            steer    = int(payload[9:12])
+        except:
+            return None # invalid payload
 
-        if x > 0:
-            return FORWARD, s, d
-        else:
-            return BACKWARD, s, d
+        return gear, rate, steer
 
-    def sense(self) -> tuple:
-        x, y, z = microbit.accelerometer.get_values()
-        return self._calculate(x, y)
+    def sense(self) -> tuple or None:  # gear(SFB, rate(0..99), steer(-99..99)
+        payload = self.receive()
+        if payload is None: return None
+        return self.decode(payload)
+
 
 tg = TimingGate(TICKSEC)
 controller = Controller()
-gear, speed, direction = STOP, 0, 0
+gear, rate, steer = STOP, 0, 0
 
 
 #----- API ---------------------------------------------------------------------
 
 def sense() -> tuple:  # (changed, gear, speed, direction)
     """Sense the controller values"""
-    global gear, speed, direction
+    global gear, rate, steer
 
     changed = False
     if tg():
         print("TICK")
-        g, s, d = controller.sense()
-        if g != gear:
-            gear = g
-            changed = True
-        if s != speed:
-            speed = s
-            changed = True
-        if d != direction:
-            direction = d
-            changed = True
+        values = controller.sense()
+        if values is not None:
+            g, r, s = values
+            if g != gear:
+                gear = g
+                changed = True
+            if r != rate:
+                rate = r
+                changed = True
+            if s != steer:
+                steer = s
+                changed = True
 
-    return changed, gear, speed, direction
+    return changed, gear, rate, steer
 
 
 # END
