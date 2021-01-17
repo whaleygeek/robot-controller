@@ -10,33 +10,33 @@ import time
 import rcontrol as remote
 import robot
 
-robbie = robot.VisualRobot()
+robby = robot.VisualRobot()  # From: Forbidden Planet, 1956.
 
-def forward(rate=100):
+def forward(speed=100):
     # change this to move your robot forward
-    robbie.forward(rate)
+    robby.forward(speed)
 
-def backward(rate=100):
+def backward(speed=100):
     # change this to move your robot backward
-    robbie.backward(rate)
+    robby.backward(speed)
 
 def stop():
     # change this to stop your robot
-    robbie.stop()
+    robby.stop()
 
-def steer(pos=0):
+def steer(direction=0):
     # change this to steer your robot
-    robbie.steer(pos)
+    robby.steer(direction)
 
 while True:
-    changed, g, r, s = remote.sense()
+    changed, gear, speed, direction = remote.sense()
     if changed:
-        if   g == remote.FORWARD:    forward(r)
-        elif g == remote.BACKWARD:   backward(r)
-        elif g == remote.STOP:       stop()
-        steer(s)
-    #robbie.loop()  # use a timing gate in there for moves
-    robbie.move() ## TODO do with a thread in robot.py
+        if   gear == remote.FORWARD:    forward(speed)
+        elif gear == remote.BACKWARD:   backward(speed)
+        elif gear == remote.STOP:       stop()
+        steer(direction)
+    #robby.loop()  # use a timing gate in there for moves
+    robby.move() ## TODO do with a thread in robot.py
     time.sleep(0.1)
 
 # END
