@@ -6,7 +6,10 @@ if sys.hexversion < 0x03000000:
     exit("Please use python3")
 
 import time
-import microbit
+##import microbit_mock as microbit  # simulated microbit use
+import microbit  # bitio use
+
+microbit.radio.on()
 
 FORWARD  = "F"
 BACKWARD = "B"

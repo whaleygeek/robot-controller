@@ -46,7 +46,7 @@ class VisualRobot():
         if self._steer != 0:
             r = self._steer / 5
             if r < 0:
-                turtle.left(r)
+                turtle.left(-r)
             else:
                 turtle.right(r)
 

@@ -35,7 +35,8 @@ while True:
         elif g == remote.BACKWARD:   backward(r)
         elif g == remote.STOP:       stop()
         steer(s)
+    #robbie.loop()  # use a timing gate in there for moves
     robbie.move() ## TODO do with a thread in robot.py
     time.sleep(0.1)
-    
+
 # END
