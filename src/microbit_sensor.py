@@ -99,5 +99,11 @@ def loop():
         sleep(UPDATEMS)
 
 # MAIN PROGRAM
-radio.on()
-loop()
+while True:
+    try:
+        radio.on()
+        loop()
+    except:
+        radio.off()
+        display.show(Image.NO)
+        sleep(500)
