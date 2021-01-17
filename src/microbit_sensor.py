@@ -8,6 +8,7 @@ import radio
 
 DEADZONE = 100
 ACCMAX   = 1000
+UPDATEMS = 500
 STOP     = "S"
 FORWARD  = "F"
 BACKWARD = "B"
@@ -25,9 +26,7 @@ IMG_BWDM1 = Image("00000:00000:00000:10000:11000")
 IMG_BWD0  = Image("00000:00000:00000:01010:00100")
 IMG_BWDP1 = Image("00000:00000:00000:00001:00011")
 
-def sense():
-    x,y,z = accelerometer.get_values()
-
+def sense(x, y):
     # work out which gear we are in
     if abs(x) < DEADZONE or abs(y) < DEADZONE: return STOP, 0, 0
     if y > 0: gear = FORWARD
@@ -90,10 +89,23 @@ def encode(gear, rate, steer, user=None):
     return payload
 
 def loop():
-    gear, rate, steer = sense()
-    update_display(gear, steer)
-    radio.send(encode(gear, rate, steer))
+    while True:
+        x, y, z = accelerometer.get_values()
+        gear, rate, steer = sense(x, y)
+        update_display(gear, steer)
+        radio.send(encode(gear, rate, steer))
+        sleep(UPDATEMS)
 
 # MAIN PROGRAM
 radio.on()
-loop()
+#loop()
+
+while True:
+    x, y, z = accelerometer.get_values()
+    print(x, y, z)
+
+    #gear, rate, steer = sense(x, y)
+    #print(gear, rate, steer)
+
+    sleep(1000)
+
