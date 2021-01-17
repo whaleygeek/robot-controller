@@ -16,15 +16,15 @@ UNIQUE   = "RC"
 seqno    = 0
 #radio.configure(channel=7, power=6, group=0)
 
-IMG_STOP  = Image("00000:00000:00100:00000:00000")
-IMG_FWDM2 = Image("00000:01000:10000:01000:00000")
-IMG_FWDM1 = Image("11000:10000:00000:00000:00000")
-IMG_FWD0  = Image("00100:01010:00000:00000:00000")
-IMG_FWDP1 = Image("00011:00001:00000:00000:00000")
-IMG_FWDP2 = Image("00000:00010:00001:00010:00000")
-IMG_BWDM1 = Image("00000:00000:00000:10000:11000")
-IMG_BWD0  = Image("00000:00000:00000:01010:00100")
-IMG_BWDP1 = Image("00000:00000:00000:00001:00011")
+IMG_STOP  = Image("00000:00000:00900:00000:00000")
+IMG_FWDM2 = Image("00000:09000:90000:09000:00000")
+IMG_FWDM1 = Image("99000:90000:00000:00000:00000")
+IMG_FWD0  = Image("00900:09090:00000:00000:00000")
+IMG_FWDP1 = Image("00099:00009:00000:00000:00000")
+IMG_FWDP2 = Image("00000:00090:00009:00090:00000")
+IMG_BWDM1 = Image("00000:00000:00000:90000:99000")
+IMG_BWD0  = Image("00000:00000:00000:09090:00900")
+IMG_BWDP1 = Image("00000:00000:00000:00009:00099")
 
 def sense(x, y):
     # work out which gear we are in
@@ -81,12 +81,14 @@ def dig2(v, signed=False):
     return v
 
 def encode(gear, rate, steer, user=None):
+    global seqno
     ba = "1" if button_a.is_pressed() else "0"
     bb = "1" if button_b.is_pressed() else "0"
-    payload = UNIQUE + seqno + ba + bb + gear + dig2(rate) + dig2(steer, signed=True)
+    payload = UNIQUE + dig2(seqno) + ba + bb + gear + dig2(rate) + dig2(steer, signed=True)
     chk = dig2(chksum(payload))
     payload += chk
     if user is not None: payload += user
+    seqno = (seqno + 1) % 100
     return payload
 
 def loop():
@@ -94,9 +96,11 @@ def loop():
         x, y, z = accelerometer.get_values()
         ##print(x, y)
         gear, rate, steer = sense(x, y)
-        print(gear, rate, steer)
+        ##print(gear, rate, steer)
         update_display(gear, steer)
-        ##radio.send(encode(gear, rate, steer))
+        payload = encode(gear, rate, steer)
+        print(payload)
+        ##radio.send(payload)
         sleep(UPDATEMS)
 
 # MAIN PROGRAM
