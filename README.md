@@ -40,7 +40,7 @@ the new CONNECT feature and flash it directly from the web browser.
 
 5. Remove your controller micro:bit and power it with batteries.
 
-6. Plug your receive micro:bit into the USB drive. Inside the `for_microbit`
+6. Plug your receive micro:bit into the USB port. Inside the `for_microbit`
 folder is a pre-written hex file called `bitio.hex` - drag and drop this
 file onto the MICROBIT drive.
 
@@ -63,7 +63,7 @@ Here is a diagram of the internal architecture of the code:
 ![Architecture](doc/architecture.png)
 
 This project uses another package called `bitio` which can be found here:
-[Bitio Github page](https://github.com/whaleygeek/bitio)
+[Bitio Github page](https://github.com/whaleygeek/bitio).
 Bitio is a reusable package that allows you to control a micro:bit over
 USB directly from within Python on your main computer. You don't need to
 worry though, as bitio is built-in to this robot-controller project.
@@ -168,20 +168,21 @@ Depending on how many wheels your robot has, you may have to write different
 code here. Let's assume you have a two-wheel robot with a front ball bearing
 support, and let's assume you have no speed control. So, if the direction is
 negative (direction<=-1) you want to turn left (so turn the left motor 
-anti-clockwise and the right motor clockwise). If the direction is positive 
-(direction>=1) you want to turn right (so turn the left motor clockwise and the 
-right motor anti-clockwise).
+clockwise and the right motor clockwise). If the direction is positive 
+(direction>=1) you want to turn right (so turn the left motor anti-clockwise and 
+the right motor anti-clockwise).
 
 To steer straight ahead (direction==0), both motors need to turn the same way.
 
 Of course, whether the motors turn clockwise or anti-clockwise will depend
-on the `forward()` or `backward()` request. You could use a global variable
-to store the gear setting, and then do all the motor control code in
-the `steer()` function if you want.
+on the `forward()` or `backward()` request, and also will depend on the position
+of your wheels and how you wired the motors to the motor controller.
+You could use a global variable to store the gear setting, and then do all the 
+motor control code in the `steer()` function if you want.
 
 If you have speed control of your motors (e.g. PWM control), you can use the 
 `speed` parameter to set the PWM percentage, and you can use the `direction`
-variable to set the blend of left and right motors to adjust how far you
+parameter to set the blend of left and right motors to adjust how far you
 steer. Or, if you have a servo motor for steering, you can drive the position
 of that based on the `direction` value.
 
