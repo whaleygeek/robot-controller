@@ -1,5 +1,7 @@
 # A Wireless robot controller, built with a BBC micro:bit
 
+[![YouTube](youtube.png)](https://www.youtube.com/watch?v=zhaUPd_8D0I)
+
 ## What is this?
 
 This project allows you to build your own wireless remote control for
